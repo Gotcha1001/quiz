@@ -1,0 +1,67 @@
+model User {
+    id            String         @id @default(uuid())
+    clerkId       String         @unique
+    role          String         @default("user")
+    categoryStats CategoryStat[]
+
+    @@map("user")
+}
+
+model Category {
+    id            String         @id @default(uuid())
+    name          String
+    description   String?
+    image         String?
+    quizzes       Quiz[]
+    categoryStats CategoryStat[]
+
+    @@map("category")
+}
+
+model Quiz {
+    id          String     @id @default(uuid())
+    title       String
+    description String?
+    image       String?
+    categoryId  String
+    category    Category   @relation(fields: [categoryId], references: [id])
+    questions   Question[]
+
+    @@map("quiz")
+}
+
+model Question {
+    id         String   @id @default(uuid())
+    text       String
+    quizId     String
+    difficulty String?
+    quiz       Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    options    Option[]
+
+    @@map("question")
+}
+
+model Option {
+    id         String   @id @default(uuid())
+    text       String
+    isCorrect  Boolean
+    questionId String
+    question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+    @@map("option")
+}
+
+model CategoryStat {
+    id           String    @id @default(uuid())
+    userId       String
+    user         User      @relation(fields: [userId], references: [id])
+    categoryId   String
+    category     Category  @relation(fields: [categoryId], references: [id])
+    attempts     Int       @default(0)
+    completed    Int       @default(0)
+    averageScore Float?
+    lastAttempt  DateTime?
+
+    @@unique([userId, categoryId])
+    @@map("category_stat")
+}
